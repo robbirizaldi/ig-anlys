@@ -1,299 +1,1353 @@
-(() => {
-  "use strict";
+:root {
+  --paper: #f5f2eb;
+  --surface: #fffdf8;
+  --ink: #1d1c19;
+  --muted: #716d64;
+  --line: #d9d3c8;
 
-  const state = {
-    followers: new Map(),
-    following: new Map(),
-    recentUnfollows: new Map(),
-    view: "all",
-    search: "",
-    sort: "username",
-    sourceName: ""
-  };
+  --accent: #8c3f32;
+  --accent-dark: #642c24;
 
-  const $ = (selector) => document.querySelector(selector);
+  --soft: #ebe5da;
+  --green: #4e6954;
 
-  const elements = {
-    fileInput: $("#fileInput"),
-    dropzone: $("#dropzone"),
-    dashboard: $("#dashboard"),
-    accountList: $("#accountList"),
-    emptyState: $("#emptyState"),
-    searchInput: $("#searchInput"),
-    sortSelect: $("#sortSelect"),
-    exportCsv: $("#exportCsv"),
-    resultCount: $("#resultCount"),
-    fileStatus: $("#fileStatus"),
-    toast: $("#toast")
-  };
+  --shadow:
+    0 12px 30px rgba(29, 28, 25, 0.07);
+}
 
-  function showToast(message) {
-    elements.toast.textContent = message;
-    elements.toast.classList.add("show");
-    clearTimeout(showToast.timer);
-    showToast.timer = setTimeout(() => elements.toast.classList.remove("show"), 3000);
+
+* {
+  box-sizing: border-box;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+body {
+  margin: 0;
+
+  background: var(--paper);
+  color: var(--ink);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  line-height: 1.5;
+}
+
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.site-header {
+  min-height: 76px;
+
+  padding:
+    14px
+    clamp(18px, 4vw, 54px);
+
+  border-bottom: 1px solid var(--line);
+
+  background:
+    rgba(255, 253, 248, 0.94);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 10;
+
+  backdrop-filter: blur(8px);
+}
+
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.brand-mark {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--ink);
+
+  border-radius: 50%;
+
+  font-size: 24px;
+}
+
+
+.brand h1 {
+  margin: 0;
+
+  font-size: 16px;
+
+  letter-spacing: -0.01em;
+}
+
+
+.brand p {
+  margin: 1px 0 0;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.button {
+  border: 0;
+
+  padding: 10px 15px;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+
+.button-dark {
+  background: var(--ink);
+  color: white;
+}
+
+
+.button-outline {
+  background: transparent;
+
+  color: var(--ink);
+
+  border: 1px solid var(--line);
+}
+
+
+.button-outline:hover {
+  border-color: var(--ink);
+
+  background: var(--surface);
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container {
+  width: min(
+    1180px,
+    calc(100% - 32px)
+  );
+
+  margin: 0 auto;
+
+  padding:
+    58px 0
+    30px;
+}
+
+
+/* =========================
+   INTRO
+========================= */
+
+.intro {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    310px;
+
+  gap: 48px;
+
+  align-items: end;
+
+  margin-bottom: 38px;
+}
+
+
+.eyebrow {
+  margin: 0 0 8px;
+
+  color: var(--accent);
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.16em;
+}
+
+
+h2 {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(32px, 5vw, 56px);
+
+  font-weight: 500;
+
+  letter-spacing: -0.035em;
+
+  line-height: 1.02;
+
+  margin: 0;
+
+  max-width: 760px;
+}
+
+
+.lead {
+  max-width: 730px;
+
+  color: var(--muted);
+
+  font-size: 16px;
+
+  margin:
+    18px
+    0
+    0;
+}
+
+
+.privacy-note {
+  border-left:
+    2px solid
+    var(--accent);
+
+  padding:
+    4px
+    0
+    4px
+    18px;
+
+  display: grid;
+
+  gap: 5px;
+}
+
+
+.privacy-note strong {
+  font-size: 13px;
+}
+
+
+.privacy-note span {
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   DROPZONE
+========================= */
+
+.dropzone {
+  border:
+    1px dashed
+    #aaa397;
+
+  background:
+    rgba(255, 253, 248, 0.58);
+
+  padding: 52px 24px;
+
+  text-align: center;
+
+  border-radius: 8px;
+
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+
+.dropzone.dragover {
+  border-color: var(--accent);
+
+  background: #eee7dc;
+}
+
+
+.drop-icon {
+  font-size: 28px;
+
+  margin-bottom: 8px;
+}
+
+
+.dropzone h3 {
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 25px;
+
+  font-weight: 500;
+
+  margin: 0 0 6px;
+}
+
+
+.dropzone p {
+  color: var(--muted);
+
+  font-size: 13px;
+
+  max-width: 690px;
+
+  margin:
+    0
+    auto
+    20px;
+}
+
+
+.dropzone code,
+.method-note code {
+  background: var(--soft);
+
+  padding:
+    2px
+    5px;
+
+  border-radius: 3px;
+}
+
+
+.drop-hint {
+  margin-top: 12px !important;
+
+  margin-bottom: 0 !important;
+
+  font-size: 11px !important;
+}
+
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#dashboard {
+  margin-top: 64px;
+}
+
+
+.section-heading {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: end;
+
+  gap: 20px;
+
+  margin-bottom: 18px;
+}
+
+
+.section-heading h2 {
+  font-size: 34px;
+}
+
+
+.heading-actions {
+  display: flex;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+
+/* =========================
+   UPLOAD MANAGER
+========================= */
+
+.uploaded-panel {
+  margin:
+    22px
+    0
+    24px;
+
+  padding:
+    14px
+    16px;
+
+  border:
+    1px solid
+    var(--line);
+
+  background: var(--surface);
+}
+
+
+.upload-panel-head {
+  display: flex;
+
+  align-items: baseline;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+
+.upload-panel-head strong {
+  font-size: 12px;
+}
+
+
+.upload-panel-head span {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  margin-top: 3px;
+}
+
+
+.text-button {
+  border: 0;
+
+  background: transparent;
+
+  color: var(--accent);
+
+  cursor: pointer;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  padding: 4px;
+}
+
+
+.text-button:hover {
+  text-decoration: underline;
+}
+
+
+.upload-slots {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 8px;
+}
+
+
+.upload-slot {
+  min-width: 0;
+
+  border:
+    1px solid
+    var(--line);
+
+  padding: 11px;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto;
+
+  gap: 8px;
+
+  align-items: center;
+
+  background: #fbf8f1;
+}
+
+
+.slot-copy {
+  display: flex;
+
+  gap: 8px;
+
+  align-items: center;
+
+  min-width: 0;
+}
+
+
+.slot-copy > div {
+  min-width: 0;
+}
+
+
+.slot-copy strong {
+  display: block;
+
+  font-size: 11px;
+}
+
+
+.slot-copy small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+.slot-icon {
+  width: 25px;
+  height: 25px;
+
+  border:
+    1px solid
+    var(--line);
+
+  display: grid;
+
+  place-items: center;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  flex: 0 0 auto;
+}
+
+
+.slot-files {
+  grid-column:
+    1 / -1;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  min-height: 25px;
+
+  align-items: center;
+}
+
+
+.slot-empty {
+  color: #9b958a;
+
+  font-size: 9px;
+
+  font-style: italic;
+}
+
+
+.mini-button {
+  border:
+    1px solid
+    var(--line);
+
+  background: var(--surface);
+
+  cursor: pointer;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  padding:
+    5px
+    8px;
+}
+
+
+.mini-button:hover {
+  border-color: var(--ink);
+}
+
+
+.file-chip {
+  max-width: 100%;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  border:
+    1px solid
+    var(--line);
+
+  background: #f1ede4;
+
+  border-radius: 4px;
+
+  padding:
+    6px
+    8px;
+
+  font-size: 10px;
+}
+
+
+.file-chip b {
+  color: var(--green);
+}
+
+
+.remove-file {
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  color: var(--muted);
+
+  font-size: 14px;
+
+  line-height: 1;
+
+  padding: 0 1px;
+}
+
+
+.remove-file:hover {
+  color: var(--accent);
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, 1fr);
+
+  gap: 10px;
+
+  margin-bottom: 28px;
+}
+
+
+.stat-card {
+  background: var(--surface);
+
+  border:
+    1px solid
+    var(--line);
+
+  padding: 17px;
+
+  min-height: 126px;
+
+  box-shadow: var(--shadow);
+}
+
+
+.stat-card span {
+  display: block;
+
+  font-size: 11px;
+
+  color: var(--muted);
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.07em;
+}
+
+
+.stat-card strong {
+  display: block;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 31px;
+
+  font-weight: 500;
+
+  margin:
+    7px
+    0
+    2px;
+}
+
+
+.stat-card small {
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+.tabs {
+  display: flex;
+
+  overflow-x: auto;
+
+  border-bottom:
+    1px solid
+    var(--line);
+
+  scrollbar-width: thin;
+}
+
+
+.tab {
+  flex:
+    0 0 auto;
+
+  background: transparent;
+
+  border: 0;
+
+  padding:
+    13px
+    16px;
+
+  color: var(--muted);
+
+  cursor: pointer;
+
+  border-bottom:
+    2px solid
+    transparent;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+
+.tab.active {
+  color: var(--ink);
+
+  border-bottom-color:
+    var(--accent);
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.toolbar {
+  display: flex;
+
+  gap: 10px;
+
+  margin:
+    16px
+    0
+    10px;
+}
+
+
+.search-wrap {
+  flex: 1;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  background: var(--surface);
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 5px;
+
+  padding:
+    0
+    12px;
+}
+
+
+.search-wrap span {
+  color: var(--muted);
+
+  font-size: 21px;
+}
+
+
+.search-wrap input {
+  width: 100%;
+
+  border: 0;
+
+  outline: 0;
+
+  background: transparent;
+
+  padding:
+    11px
+    0;
+}
+
+
+select {
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 5px;
+
+  background: var(--surface);
+
+  color: var(--ink);
+
+  padding:
+    0
+    12px;
+
+  outline: 0;
+}
+
+
+/* =========================
+   LIST
+========================= */
+
+.list-meta {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  padding:
+    8px
+    2px;
+}
+
+
+.account-list {
+  border-top:
+    1px solid
+    var(--line);
+}
+
+
+.account {
+  display: grid;
+
+  grid-template-columns:
+    48px
+    1fr
+    auto;
+
+  gap: 13px;
+
+  align-items: center;
+
+  padding:
+    13px
+    8px;
+
+  border-bottom:
+    1px solid
+    var(--line);
+}
+
+
+.avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  display: grid;
+
+  place-items: center;
+
+  background: var(--soft);
+
+  color: var(--ink);
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 17px;
+}
+
+
+.account-name {
+  font-weight: 700;
+
+  font-size: 13px;
+}
+
+
+.account-name a {
+  color: inherit;
+
+  text-decoration: none;
+}
+
+
+.account-name a:hover {
+  text-decoration: underline;
+}
+
+
+.account-date {
+  color: var(--muted);
+
+  font-size: 10px;
+
+  margin-top: 2px;
+}
+
+
+.badges {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: flex-end;
+
+  gap: 5px;
+}
+
+
+.badge {
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 999px;
+
+  padding:
+    4px
+    8px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
+}
+
+
+.badge.mutual {
+  border-color: #aebdac;
+
+  color: var(--green);
+}
+
+
+.badge.warning {
+  border-color: #cba69d;
+
+  color: var(--accent);
+}
+
+
+.badge.neutral {
+  color: var(--muted);
+}
+
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty-state {
+  border:
+    1px solid
+    var(--line);
+
+  background: var(--surface);
+
+  padding: 45px 20px;
+
+  text-align: center;
+
+  display: grid;
+
+  gap: 5px;
+}
+
+
+.empty-state span {
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   INFO
+========================= */
+
+.method-note {
+  margin-top: 48px;
+
+  padding: 20px;
+
+  border:
+    1px solid
+    var(--line);
+
+  background: #eee9df;
+}
+
+
+.method-note h3 {
+  margin: 0 0 7px;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 18px;
+
+  font-weight: 500;
+}
+
+
+.method-note p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  max-width: 900px;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+  width: min(
+    1180px,
+    calc(100% - 32px)
+  );
+
+  margin:
+    30px
+    auto;
+
+  padding-top: 18px;
+
+  border-top:
+    1px solid
+    var(--line);
+
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast {
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 22px;
+
+  transform:
+    translate(
+      -50%,
+      20px
+    );
+
+  background: var(--ink);
+
+  color: white;
+
+  padding:
+    10px
+    14px;
+
+  border-radius: 5px;
+
+  font-size: 12px;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: 0.2s;
+
+  max-width:
+    calc(100% - 30px);
+
+  text-align: center;
+
+  z-index: 30;
+}
+
+
+.toast.show {
+  opacity: 1;
+
+  transform:
+    translate(
+      -50%,
+      0
+    );
+}
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 980px) {
+
+  .intro {
+    grid-template-columns: 1fr;
+
+    gap: 25px;
   }
 
-  function usernameFromFollower(item) {
-    const entry = item?.string_list_data?.[0];
-    return entry?.value || "";
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
   }
 
-  function usernameFromFollowing(item) {
-    return item?.title || item?.string_list_data?.[0]?.value || "";
+
+  .upload-slots {
+    grid-template-columns:
+      1fr;
   }
 
-  function timestampFromItem(item) {
-    return item?.string_list_data?.[0]?.timestamp || item?.timestamp || 0;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 650px) {
+
+  .site-header {
+    padding:
+      12px
+      16px;
   }
 
-  function normalizeUsername(value) {
-    return String(value || "").trim().replace(/^@/, "").toLowerCase();
+
+  .brand p {
+    display: none;
   }
 
-  function addRecord(map, username, item) {
-    const key = normalizeUsername(username);
-    if (!key) return;
-    map.set(key, {
-      username: username.trim(),
-      timestamp: timestampFromItem(item),
-      name: item?.label_values?.find(x => x.label === "Name")?.value || "",
-      url: item?.string_list_data?.[0]?.href || item?.label_values?.find(x => x.label === "URL")?.value || `https://www.instagram.com/${key}/`
-    });
+
+  .header-actions .button {
+    padding:
+      9px
+      10px;
   }
 
-  function parseJsonObject(filename, data) {
-    const lower = filename.toLowerCase();
-    const text = JSON.stringify(data).toLowerCase();
 
-    if (lower.includes("followers") && !lower.includes("following")) {
-      const arr = Array.isArray(data) ? data : [];
-      arr.forEach(item => addRecord(state.followers, usernameFromFollower(item), item));
-      return "followers";
-    }
-
-    if (lower.includes("following")) {
-      const arr = Array.isArray(data) ? data : data?.relationships_following;
-      if (Array.isArray(arr)) {
-        arr.forEach(item => addRecord(state.following, usernameFromFollowing(item), item));
-        return "following";
-      }
-    }
-
-    if (lower.includes("recently_unfollowed")) {
-      const arr = Array.isArray(data) ? data : [];
-      arr.forEach(item => {
-        const username = item?.label_values?.find(x => x.label === "Username")?.value || "";
-        addRecord(state.recentUnfollows, username, item);
-      });
-      return "unfollowed";
-    }
-
-    // Fallback for renamed files.
-    if (text.includes("relationships_following")) {
-      const arr = data.relationships_following;
-      if (Array.isArray(arr)) arr.forEach(item => addRecord(state.following, usernameFromFollowing(item), item));
-      return "following";
-    }
-    if (Array.isArray(data) && data.some(x => x?.string_list_data?.[0]?.value)) {
-      data.forEach(item => addRecord(state.followers, usernameFromFollower(item), item));
-      return "followers";
-    }
-    return null;
-  }
-
-  async function readFile(file) {
-    state.followers.clear();
-    state.following.clear();
-    state.recentUnfollows.clear();
-
-    if (file.name.toLowerCase().endsWith(".zip")) {
-      if (typeof JSZip === "undefined") {
-        throw new Error("ZIP support could not load. Check your internet connection and try the JSON files directly.");
-      }
-      const zip = await JSZip.loadAsync(file);
-      const jsonFiles = Object.values(zip.files).filter(entry =>
-        !entry.dir && entry.name.toLowerCase().endsWith(".json")
+  .container {
+    width:
+      min(
+        100% - 22px,
+        1180px
       );
 
-      for (const entry of jsonFiles) {
-        const text = await entry.async("string");
-        try {
-          parseJsonObject(entry.name, JSON.parse(text));
-        } catch (_) {
-          // Ignore unrelated/broken JSON files from an export.
-        }
-      }
-      state.sourceName = file.name;
-      return;
-    }
-
-    const text = await file.text();
-    parseJsonObject(file.name, JSON.parse(text));
-    state.sourceName = file.name;
+    padding-top: 34px;
   }
 
-  function getRows() {
-    const F = state.followers;
-    const G = state.following;
-    const U = state.recentUnfollows;
 
-    let rows = [];
-
-    if (state.view === "unfollowed") {
-      rows = [...U.values()].map(item => ({
-        ...item,
-        status: "recent-unfollow"
-      }));
-    } else {
-      rows = [...G.values()].map(item => {
-        const key = normalizeUsername(item.username);
-        const follower = F.get(key);
-        return {
-          ...item,
-          status: follower ? "mutual" : "not-back",
-          followedYou: Boolean(follower),
-          youFollow: true
-        };
-      });
-
-      if (state.view === "not-followed") {
-        rows = [...F.values()]
-          .filter(item => !G.has(normalizeUsername(item.username)))
-          .map(item => ({ ...item, status: "not-followed", followedYou: true, youFollow: false }));
-      } else if (state.view === "not-back") {
-        rows = rows.filter(row => row.status === "not-back");
-      } else if (state.view === "mutual") {
-        rows = rows.filter(row => row.status === "mutual");
-      }
-    }
-
-    const q = normalizeUsername(state.search);
-    if (q) {
-      rows = rows.filter(row =>
-        normalizeUsername(row.username).includes(q) ||
-        normalizeUsername(row.name).includes(q)
-      );
-    }
-
-    rows.sort((a, b) => {
-      if (state.sort === "recent") return (b.timestamp || 0) - (a.timestamp || 0);
-      if (state.sort === "oldest") return (a.timestamp || 0) - (b.timestamp || 0);
-      return normalizeUsername(a.username).localeCompare(normalizeUsername(b.username));
-    });
-
-    return rows;
+  .intro {
+    margin-bottom: 26px;
   }
 
-  function formatDate(timestamp) {
-    if (!timestamp) return "";
-    const date = new Date(Number(timestamp) * 1000);
-    if (Number.isNaN(date.getTime())) return "";
-    return new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short", year: "numeric" }).format(date);
+
+  h2 {
+    font-size: 37px;
   }
 
-  function renderStats() {
-    const f = state.followers.size;
-    const g = state.following.size;
-    let mutual = 0;
-    let notBack = 0;
-    for (const username of G.keys()) {
-      if (F.has(username)) mutual++;
-      else notBack++;
-    }
-    const notFollowed = [...F.keys()].filter(username => !G.has(username)).length;
 
-    $("#followersCount").textContent = f.toLocaleString();
-    $("#followingCount").textContent = g.toLocaleString();
-    $("#mutualCount").textContent = mutual.toLocaleString();
-    $("#notBackCount").textContent = notBack.toLocaleString();
-    $("#notFollowedCount").textContent = notFollowed.toLocaleString();
-    $("#unfollowedCount").textContent = state.recentUnfollows.size.toLocaleString();
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
-  function badge(row) {
-    if (row.status === "mutual") return '<span class="badge mutual">Mutual</span>';
-    if (row.status === "not-back") return '<span class="badge warning">Doesn’t follow you</span>';
-    if (row.status === "not-followed") return '<span class="badge neutral">You don’t follow</span>';
-    return '<span class="badge warning">Recent unfollow</span>';
+
+  .stat-card {
+    min-height: 112px;
+
+    padding: 13px;
   }
 
-  function render() {
-    const rows = getRows();
-    elements.accountList.innerHTML = rows.map(row => {
-      const username = row.username || "unknown";
-      const initial = username.charAt(0).toUpperCase();
-      const url = row.url || `https://www.instagram.com/${encodeURIComponent(username)}/`;
-      return `
-        <article class="account">
-          <div class="avatar">${escapeHtml(initial)}</div>
-          <div>
-            <div class="account-name">
-              <a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer">@${escapeHtml(username)}</a>
-            </div>
-            <div class="account-date">${escapeHtml(row.name || "")}${row.timestamp ? ` · ${formatDate(row.timestamp)}` : ""}</div>
-          </div>
-          <div class="badges">${badge(row)}</div>
-        </article>
-      `;
-    }).join("");
 
-    elements.emptyState.classList.toggle("hidden", rows.length !== 0);
-    elements.resultCount.textContent = `${rows.length.toLocaleString()} account${rows.length === 1 ? "" : "s"}`;
-    elements.fileStatus.textContent = state.sourceName ? `Source: ${state.sourceName}` : "No file loaded";
+  .stat-card strong {
+    font-size: 27px;
   }
 
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, c => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[c]));
+
+  .section-heading {
+    align-items: flex-start;
+
+    flex-direction: column;
   }
 
-  function escapeAttribute(value) {
-    return escapeHtml(value).replace(/`/g, "&#096;");
+
+  .heading-actions {
+    width: 100%;
   }
 
-  function setLoaded() {
-    elements.dashboard.classList.remove("hidden");
-    elements.dropzone.classList.add("hidden");
-    renderStats();
-    render();
+
+  .heading-actions .button {
+    flex: 1;
   }
 
-  async function handleFile(file) {
-    if (!file) return;
-    const valid = file.name.toLowerCase().endsWith(".json") || file.name.toLowerCase().endsWith(".zip");
-    if (!valid) {
-      showToast("Please choose an Instagram .json or .zip export.");
-      return;
-    }
 
-    try {
-      showToast("Reading your export locally…");
-      await readFile(file);
-      if (!state.followers.size && !state.following.size && !state.recentUnfollows.size) {
-        throw new Error("No recognizable Instagram relationship data was found.");
-      }
-      setLoaded();
-      showToast("Analysis complete.");
-    } catch (error) {
-      console.error(error);
-      showToast(error.message || "Could not read this file.");
-    }
+  .upload-panel-head {
+    flex-direction: column;
+
+    gap: 3px;
   }
 
-  elements.fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
 
-  ["dragenter", "dragover"].forEach(eventName => {
-    elements.dropzone.addEventListener(eventName, e => {
-      e.preventDefault();
-      elements.dropzone.classList.add("dragover");
-    });
-  });
-  ["dragleave", "drop"].forEach(eventName => {
-    elements.dropzone.addEventListener(eventName, e => {
-      e.preventDefault();
-      elements.dropzone.classList.remove("dragover");
+  .toolbar {
+    flex-direction: column;
+  }
+
+
+  select {
+    min-height: 43px;
+  }
+
+
+  .account {
+    grid-template-columns:
+      38px
+      1fr;
+  }
+
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+
+    font-size: 14px;
+  }
+
+
+  .badges {
+    grid-column: 2;
+
+    justify-content:
+      flex-start;
+  }
+
+
+  footer {
+    flex-direction: column;
+  }
+
+}    elements.dropzone.classList.remove("dragover");
     });
   });
   elements.dropzone.addEventListener("drop", e => handleFile(e.dataTransfer.files[0]));
